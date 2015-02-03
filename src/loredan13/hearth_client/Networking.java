@@ -20,22 +20,43 @@ public class Networking {
     public static final String STATE_PATH = "/api/state";
     public static final String LOCATION_PATH = "/api/location";
 
+    public static JSONObject CONFIG;
+
     private static String TOKEN;
     private static String SERVER_PATH;
+    private static MyActivity ACTIVITY;
 
     private static SharedPreferences preferences;
 
-    public static void init(SharedPreferences preferences) {
+    public static void init(SharedPreferences preferences, MyActivity activity) {
         Networking.preferences = preferences;
         SERVER_PATH = preferences.getString("server_path", null);
         TOKEN = preferences.getString("token", null);
+        ACTIVITY = activity;
+
+        if (SERVER_PATH != null) {
+            try {
+                CONFIG = getConfig();
+            } catch (Exception e) {
+                e.printStackTrace();
+                CONFIG = null;
+            }
+        }
     }
 
     public static void setServer(String path) {
         SERVER_PATH = path + ":" + PORT;
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("server_path", SERVER_PATH);
-        editor.commit();
+        editor.apply();
+
+        try {
+            CONFIG = getConfig();
+            ACTIVITY.update();
+        } catch (Exception e) {
+            e.printStackTrace();
+            CONFIG = null;
+        }
     }
 
     public static void auth(String user, String password) throws Exception {
@@ -74,8 +95,8 @@ public class Networking {
 
     public static void updateMood(int mood) throws Exception {
         if (TOKEN == null) {
-        throw new Exception("Token not set");
-                }
+            throw new Exception("Token not set");
+        }
 
         HttpURLConnection connection = (HttpURLConnection) new URL(SERVER_PATH + MOOD_PATH + "?mood=" + mood).openConnection();
 
@@ -140,7 +161,7 @@ public class Networking {
         return response;
     }
 
-    public static JSONObject getConfig() throws Exception{
+    public static JSONObject getConfig() throws Exception {
         HttpURLConnection connection = (HttpURLConnection) new URL(SERVER_PATH + CONFIG_PATH).openConnection();
 
         switch (connection.getResponseCode()) {

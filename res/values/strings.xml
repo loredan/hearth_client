@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">HearthClient</string>
+    <string name="set_server_item_title">Set server</string>
+    <string name="set_server_dialog_title">Set server</string>
+    <string name="auth_item_title">Authorize</string>
+    <string name="auth_dialog_title">Authorization</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="password_hint">Password</string>
+    <string name="server_hint">Server address</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="auth_success">Authorization success</string>
+    <string name="auth_failure">Authorization failure</string>
+
+    <string name="api_user_male">male</string>
+    <string name="api_user_female">female</string>
 </resources>
