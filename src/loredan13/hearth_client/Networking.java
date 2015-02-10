@@ -1,6 +1,5 @@
 package loredan13.hearth_client;
 
-import android.content.SharedPreferences;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
@@ -15,52 +14,25 @@ import java.net.URL;
 public class Networking {
     public static final String PORT = "12592";
     public static final String AUTH_PATH = "/api/auth";
-    public static final String MOOD_PATH = "/api/path";
+    public static final String MOOD_PATH = "/api/mood";
     public static final String CONFIG_PATH = "/api/config";
     public static final String STATE_PATH = "/api/state";
     public static final String LOCATION_PATH = "/api/location";
+    public static final String PROTOCOL = "http://";
 
-    public static JSONObject CONFIG;
-
-    private static String TOKEN;
-    private static String SERVER_PATH;
-    private static MyActivity ACTIVITY;
-
-    private static SharedPreferences preferences;
-
-    public static void init(SharedPreferences preferences, MyActivity activity) {
-        Networking.preferences = preferences;
-        SERVER_PATH = preferences.getString("server_path", null);
-        TOKEN = preferences.getString("token", null);
-        ACTIVITY = activity;
-
-        if (SERVER_PATH != null) {
-            try {
-                CONFIG = getConfig();
-            } catch (Exception e) {
-                e.printStackTrace();
-                CONFIG = null;
-            }
-        }
-    }
+    public static String SERVER_PATH;
 
     public static void setServer(String path) {
-        SERVER_PATH = path + ":" + PORT;
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("server_path", SERVER_PATH);
-        editor.apply();
-
-        try {
-            CONFIG = getConfig();
-            ACTIVITY.update();
-        } catch (Exception e) {
-            e.printStackTrace();
-            CONFIG = null;
-        }
+        SERVER_PATH = path;
     }
 
-    public static void auth(String user, String password) throws Exception {
-        HttpURLConnection connection = (HttpURLConnection) new URL(SERVER_PATH + AUTH_PATH).openConnection();
+    public static String auth(String user, String password) throws Exception {
+        if (SERVER_PATH == null) {
+            throw new Exception("Server path not set");
+        }
+
+        HttpURLConnection connection = (HttpURLConnection) new URL(PROTOCOL + SERVER_PATH + ":" + PORT + AUTH_PATH)
+                .openConnection();
         connection.setDoOutput(true);
         String request = new JSONStringer()
                 .object()
@@ -90,15 +62,46 @@ public class Networking {
             builder.append(temp);
         }
         JSONObject response = new JSONObject(builder.toString());
-        TOKEN = response.getString("token");
+        return response.getString("token");
     }
 
-    public static void updateMood(int mood) throws Exception {
-        if (TOKEN == null) {
+    public static void updateMood(String token, int mood) throws Exception {
+        if (SERVER_PATH == null) {
+            throw new Exception("Server path not set");
+        }
+
+        if (token == null) {
             throw new Exception("Token not set");
         }
 
-        HttpURLConnection connection = (HttpURLConnection) new URL(SERVER_PATH + MOOD_PATH + "?mood=" + mood).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL(PROTOCOL + SERVER_PATH + ":" + PORT + MOOD_PATH + "?mood=" + mood)
+                .openConnection();
+        connection.setRequestProperty("Token", token);
+
+        switch (connection.getResponseCode()) {
+            case 200:
+                break;
+            case 400:
+                throw new Exception("400 Bad Request");
+            case 403:
+                throw new Exception("403 Not Authorized");
+            default:
+                throw new Exception(String.valueOf(connection.getResponseCode()));
+        }
+    }
+
+    public static void updateState(String token, int state) throws Exception {
+        if (SERVER_PATH == null) {
+            throw new Exception("Server path not set");
+        }
+
+        if (token == null) {
+            throw new Exception("Token not set");
+        }
+
+        HttpURLConnection connection = (HttpURLConnection) new URL(PROTOCOL + SERVER_PATH + ":" + PORT + STATE_PATH + "?state=" + state)
+                .openConnection();
+        connection.setRequestProperty("Token", token);
 
         switch (connection.getResponseCode()) {
             case 200:
@@ -110,25 +113,18 @@ public class Networking {
         }
     }
 
-    public static void updateState(int state) throws Exception {
-        if (TOKEN == null) {
+    public static JSONObject updateLocation(String token, String latitude, String longitude) throws Exception {
+        if (SERVER_PATH == null) {
+            throw new Exception("Server path not set");
+        }
+
+        if (token == null) {
             throw new Exception("Token not set");
         }
 
-        HttpURLConnection connection = (HttpURLConnection) new URL(SERVER_PATH + STATE_PATH + "?state=" + state).openConnection();
-
-        switch (connection.getResponseCode()) {
-            case 200:
-                break;
-            case 400:
-                throw new Exception("400 Bad Request");
-            case 403:
-                throw new Exception("403 Not Authorized");
-        }
-    }
-
-    public static JSONObject updateLocation(String latitude, String longitude) throws Exception {
-        HttpURLConnection connection = (HttpURLConnection) new URL(SERVER_PATH + LOCATION_PATH).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL(PROTOCOL + SERVER_PATH + ":" + PORT + LOCATION_PATH)
+                .openConnection();
+        connection.setRequestProperty("Token", token);
         connection.setDoOutput(true);
         String request = new JSONStringer()
                 .object()
@@ -162,7 +158,12 @@ public class Networking {
     }
 
     public static JSONObject getConfig() throws Exception {
-        HttpURLConnection connection = (HttpURLConnection) new URL(SERVER_PATH + CONFIG_PATH).openConnection();
+        if (SERVER_PATH == null) {
+            throw new Exception("Server path not set");
+        }
+
+        HttpURLConnection connection = (HttpURLConnection) new URL(PROTOCOL + SERVER_PATH + ":" + PORT + CONFIG_PATH)
+                .openConnection();
 
         switch (connection.getResponseCode()) {
             case 200:

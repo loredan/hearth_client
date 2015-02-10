@@ -6,7 +6,10 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.inputmethod.EditorInfo;
-import android.widget.*;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 /**
  * Created by loredan13 on 03.02.2015.
@@ -54,18 +57,7 @@ public class AuthorizationDialogFragment extends DialogFragment {
 
                 final String password = passwordField.getText().toString();
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Networking.auth(user, password);
-                            Toast.makeText(getActivity(), R.string.auth_success, Toast.LENGTH_SHORT).show();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(getActivity(), R.string.auth_failure + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                ((MyActivity) getActivity()).auth(user, password);
             }
         });
 

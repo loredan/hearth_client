@@ -21,7 +21,11 @@ public class SetServerDialogFragment extends DialogFragment {
         FrameLayout form = new FrameLayout(getActivity());
 
         serverField = new EditText(getActivity());
-        serverField.setHint(getString(R.string.server_hint));
+        if (MyActivity.SERVER_PATH != null) {
+            serverField.setHint(MyActivity.SERVER_PATH);
+        } else {
+            serverField.setHint(getString(R.string.server_hint));
+        }
         form.addView(serverField);
 
         builder.setView(form);
@@ -29,8 +33,8 @@ public class SetServerDialogFragment extends DialogFragment {
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                String server = serverField.getText().toString();
-                Networking.setServer(server);
+                String path = serverField.getText().toString();
+                ((MyActivity) getActivity()).setServer(path);
             }
         });
 

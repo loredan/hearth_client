@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/set_server"
+          android:icon="@drawable/ic_action_web_site"
+          android:title="@string/set_server_item_title"
+          android:showAsAction="ifRoom"/>
+    <item android:id="@+id/authorize"
+          android:icon="@drawable/ic_action_accounts"
+          android:title="@string/auth_item_title"
+          android:showAsAction="ifRoom"/>
+</menu>
